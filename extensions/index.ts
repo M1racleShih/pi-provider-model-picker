@@ -13,10 +13,17 @@
  *   - Enter                      switch to the selected model
  *   - Esc                        cancel
  *
- * Opens via the `/pm` command and (by default) the Ctrl+L shortcut, which
- * takes precedence over the built-in model selector. Set
- * `PI_PROVIDER_MODEL_PICKER_SHORTCUT=none` to keep the built-in Ctrl+L and
- * use `/pm` only, or set it to any other key combination.
+ * Opens via the `/pm` command and the Alt+M shortcut. Alt+M is used because
+ * pi reserves a set of built-in shortcuts (including Ctrl+L for the built-in
+ * model selector) that extension shortcuts cannot override — registering a
+ * reserved key is skipped with a warning at startup. To take over Ctrl+L,
+ * rebind the built-in selector in ~/.pi/agent/keybindings.json and point this
+ * extension at the freed key:
+ *
+ *   { "app.model.select": "ctrl+alt+l" }          # keybindings.json
+ *   PI_PROVIDER_MODEL_PICKER_SHORTCUT=ctrl+l      # env var
+ *
+ * Set PI_PROVIDER_MODEL_PICKER_SHORTCUT=none to register /pm only.
  *
  * The model list mirrors the built-in picker: it prefers the session's
  * scoped models (`/scoped-models`, including pinned thinking levels) and
@@ -50,7 +57,7 @@ interface ProviderTab {
 const MAX_VISIBLE_ROWS = 12;
 
 /** Default shortcut that opens the picker. Override with PI_PROVIDER_MODEL_PICKER_SHORTCUT. */
-const DEFAULT_SHORTCUT = "ctrl+l";
+const DEFAULT_SHORTCUT = "alt+m";
 
 export class ProviderModelPicker {
   private tabIndex = 0;
@@ -309,9 +316,12 @@ export default function (pi: ExtensionAPI) {
     },
   });
 
-  // Extension shortcuts are checked before built-in app keybindings, so this
-  // takes over Ctrl+L from the built-in model selector by default. Set
-  // PI_PROVIDER_MODEL_PICKER_SHORTCUT=none to disable, or to any other key.
+  // pi reserves a set of built-in shortcuts (app.model.select = ctrl+l among
+  // them): an extension shortcut matching a reserved key is skipped with a
+  // warning at startup. The default alt+m is unbound, so it works out of the
+  // box. Users who want Ctrl+L can rebind the built-in selector in
+  // keybindings.json and set PI_PROVIDER_MODEL_PICKER_SHORTCUT=ctrl+l; see
+  // README. Set PI_PROVIDER_MODEL_PICKER_SHORTCUT=none to register /pm only.
   const shortcut = process.env.PI_PROVIDER_MODEL_PICKER_SHORTCUT ?? DEFAULT_SHORTCUT;
   if (shortcut && shortcut.toLowerCase() !== "none") {
     pi.registerShortcut(shortcut as KeyId, {

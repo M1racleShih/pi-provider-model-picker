@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Provider-grouped model picker: one tab per provider instead of a flat model list.
-- `/pm` command and `Ctrl+L` shortcut (extension shortcuts take precedence over the built-in model selector).
+- `/pm` command and `Alt+M` shortcut (`Ctrl+L` takeover possible by rebinding the built-in selector, see README).
 - `Tab` / `Shift+Tab` / `←` / `→` to switch providers, `↑` / `↓` to pick a model, typing filters within the active provider.
 - Mirrors the built-in picker's model list: session-scoped models (with pinned thinking levels) when configured, otherwise all models from authenticated providers.
 - `PI_PROVIDER_MODEL_PICKER_SHORTCUT` environment variable to change or disable (`none`) the shortcut.

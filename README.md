@@ -57,7 +57,7 @@ After installing, restart pi (or run `/reload`).
 
 | Key | Action |
 |-----|--------|
-| `Ctrl+L` or `/pm` | Open the picker |
+| `Alt+M` or `/pm` | Open the picker |
 | `Tab` / `Shift+Tab` | Next / previous provider |
 | `←` / `→` | Same as Tab / Shift+Tab |
 | `↑` / `↓` | Move within the provider's models (wraps) |
@@ -66,27 +66,52 @@ After installing, restart pi (or run `/reload`).
 | `Enter` | Switch to the selected model |
 | `Esc` / `Ctrl+C` | Cancel |
 
-> Extension shortcuts are checked before pi's built-in keybindings, so `Ctrl+L`
-> replaces the built-in model selector while this package is enabled. The
-> built-in `/model` command keeps working unchanged.
-
 ### Changing the shortcut
 
 ```bash
-# Use Alt+M instead of Ctrl+L
-export PI_PROVIDER_MODEL_PICKER_SHORTCUT=alt+m
+# Use a different key
+export PI_PROVIDER_MODEL_PICKER_SHORTCUT=ctrl+shift+m
 
-# Keep the built-in Ctrl+L picker and use /pm only
+# Register /pm only, no shortcut
 export PI_PROVIDER_MODEL_PICKER_SHORTCUT=none
 ```
+
+### Taking over Ctrl+L
+
+pi reserves certain built-in shortcuts for itself (Ctrl+L for `/model`, Ctrl+P
+for model cycling, Escape, …). An extension shortcut that matches a reserved
+key is **skipped with a warning** at startup, so this package binds `Alt+M`
+by default instead.
+
+If you want the grouped picker on `Ctrl+L`, free the key by rebinding the
+built-ins that use it in `~/.pi/agent/keybindings.json`:
+
+```json
+{
+  "app.model.select": "ctrl+alt+l",
+  "app.tree.filter.labeledOnly": "ctrl+shift+l"
+}
+```
+
+(`Ctrl+L` is bound twice by default: the model selector and a `/tree` filter
+shortcut.) Then point the extension at the freed key (e.g. in your shell
+profile):
+
+```bash
+export PI_PROVIDER_MODEL_PICKER_SHORTCUT=ctrl+l
+```
+
+After a restart, `Ctrl+L` opens the grouped picker, `Ctrl+Alt+L` still opens
+the built-in flat selector, and the built-in `/model` command keeps working
+unchanged.
 
 ## How it works
 
 The extension registers a command and a keyboard shortcut (no tools). The
 picker is a custom TUI component shown via `ctx.ui.custom()`, the same
-mechanism pi's own `/settings` uses. Selecting a model calls
-`pi.setModel()`; if a scoped-model pattern pinned a thinking level for that
-model (e.g. `anthropic/*:high`), it is applied too.
+mechanism pi's own `/settings` uses. Selecting a model calls `pi.setModel()`;
+if a scoped-model pattern pinned a thinking level for that model (e.g.
+`anthropic/*:high`), it is applied too.
 
 ## Development
 
