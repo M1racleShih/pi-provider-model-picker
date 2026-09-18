@@ -23,6 +23,13 @@ npm login          # create/verify account at npmjs.com
 npm whoami         # confirm
 ```
 
+npm requires **2FA for all publishes**: either account-level 2FA (TOTP
+authenticator app or security key — email sign-in codes do NOT count as
+publish OTPs), or a Granular Access Token created with the "Bypass two-factor
+authentication" checkbox checked (token creation is the only time it can be
+enabled). With account 2FA enabled, `npm publish` prompts for the OTP, or
+pass it directly: `npm publish --otp=123456`.
+
 ## Release steps
 
 1. Update `version` in `package.json` (semver) and add a `CHANGELOG.md` entry.
