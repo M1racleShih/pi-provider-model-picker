@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- Verify against Pi 1.0.2 (through the 1.0.0 fullscreen-by-default change): 22 tests, typecheck and the isolated regular/fullscreen/`--takeover` TUI smokes pass unchanged; development host dependencies pinned to 1.0.2.
+- Verify against Pi 0.99.1 and update development host dependencies.
+- Replace the placeholder pinned-thinking test with a real assertion; add command integration tests and isolated regular/fullscreen TUI smoke checks.
+
 ## [0.1.0] - 2026-09-18
 
 ### Added

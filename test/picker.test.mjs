@@ -85,14 +85,14 @@ console.log("opens on the current model's provider and marks it");
 console.log("filter narrows the list and enter selects the match");
 {
   let done = "SENTINEL";
-  const p = new ProviderModelPicker(tabs, "openai/gpt-5.2", {}, theme, kb, (r) => (done = r));
+  const p = new ProviderModelPicker(tabs, "openai/gpt-5.2", { "openai/gpt-5.2-codex": "max" }, theme, kb, (r) => (done = r));
   for (const ch of "cod") p.handleInput(ch);
   const lines = p.render(80);
   check("filter echoed", lines.some((l) => l.includes("filter: cod")));
   check("only codex remains", lines.some((l) => l.includes("GPT-5.2 Codex")) && !lines.some((l) => l.includes("GPT-5.1 ")));
   p.handleInput("\r");
   check("enter picks gpt-5.2-codex", done?.model?.id === "gpt-5.2-codex");
-  check("pinned thinking propagates when set", true);
+  check("pinned thinking propagates when set", done?.thinkingLevel === "max");
 }
 
 console.log("Tab / Shift+Tab cycle providers with wrap-around");
@@ -137,6 +137,45 @@ console.log("renders respect the width contract");
   const bar = p2.render(40)[2];
   check("12 providers fit in 40 cols", visibleWidth(bar) <= 40);
   check("active provider still visible", bar.includes("Provider9"));
+}
+
+console.log("extension command uses scoped models and handles selection safely");
+{
+  let handler;
+  const model = tabs[2].models[1];
+  let applied, thinking, rendered, availableCalls = 0;
+  let allowModel = true;
+  const notices = [];
+  const pi = {
+    registerCommand: (_name, def) => { handler = def.handler; }, registerShortcut() {},
+    setModel: async (m) => { applied = m; return allowModel; },
+    setThinkingLevel: (level) => { thinking = level; },
+  };
+  mod.default(pi);
+  const ctx = {
+    mode: "tui", model,
+    scopedModels: [{ model, thinkingLevel: "max" }],
+    modelRegistry: { getAvailable: async () => { availableCalls++; return [model]; }, getProvider: () => ({ name: "OpenAI" }) },
+    ui: { notify: (text, level) => notices.push([text, level]),
+      custom: async (factory) => {
+        let result;
+        const ui = factory({ requestRender() {} }, theme, kb, (r) => { result = r; });
+        rendered = ui.render(80).join("\n"); ui.handleInput("\r"); return result;
+      } },
+  };
+  await handler("", ctx);
+  check("scoped list skips authenticated catalog lookup", availableCalls === 0);
+  check("provider display name comes from registry", rendered.includes("OpenAI"));
+  check("selected model and pinned max reach host", applied === model && thinking === "max");
+  thinking = undefined; allowModel = false;
+  await handler("", ctx);
+  check("auth rejection does not apply pinned thinking", thinking === undefined && notices.at(-1)[1] === "error");
+  ctx.scopedModels = [];
+  await handler("", ctx);
+  check("unscoped picker reads available chat models", availableCalls === 1);
+  ctx.mode = "rpc";
+  await handler("", ctx);
+  check("RPC command performs no catalog/UI work", availableCalls === 1);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

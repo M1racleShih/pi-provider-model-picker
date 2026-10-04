@@ -141,3 +141,18 @@ Optional: add a `pi.image` (screenshot) or `pi.video` (MP4 demo) field to the
 ## License
 
 [MIT](LICENSE)
+
+
+## Pi compatibility verification
+
+Verified against Pi 0.85.1 (0.1.0 release), 0.99.1 and 1.0.2; development host
+packages are pinned by the lockfile to 1.0.2. `npm test` checks 22 component and
+command assertions, including actual pinned thinking propagation (the previous
+assertion was a placeholder), scoped catalog selection, auth rejection and
+non-TUI behavior. `npm run typecheck` passes against 1.0.2.
+
+`python3 test/pi-smoke.py` and `python3 test/pi-smoke.py --fullscreen` drive
+real Pi in an isolated tmux session with offline fixture providers: command and
+Alt+M, provider tabs, filtering, selection, pinned thinking, narrow resize and
+cancellation. `--takeover` additionally checks the documented Ctrl+L rebinding.
+All three variants pass on Pi 1.0.2. No credentials or model requests are used.
